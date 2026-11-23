@@ -7,7 +7,7 @@
 | **Semester**    | September to December 2026                                                                                                                                                                                                                                                              |
 | **Lecturer**    | Allan Omondi                                                                                                                                                                                                                                                                    |
 | **Contact**     | aomondi@strathmore.edu                                                                                                                                                                                                                                                          |
-| **Note**        | The lecture contains both theory and practice.<br/>This notebook forms part of the practice.<br/>It is intended for educational purposes only.<br/>Recommended citation: [BibTex](https://raw.githubusercontent.com/course-files/Kafka/refs/heads/main/RecommendedCitation.bib) |
+| **Note**        | The lecture contains both theory and practice.<br/>This notebook forms part of the practice.<br/>It is intended for educational purposes only.<br/>Recommended citation: [BibTex](https://raw.githubusercontent.com/course-files/NonRelationalDataModels/refs/heads/main/RecommendedCitation.bib) |
 
 ## Running Scenario: Pesa Platform
 
