@@ -1,0 +1,292 @@
+# =====================================================================
+# Pesa Platform labs -- one Docker Compose file, several PROFILES.
+#
+# A profile is a named group of services. You start only the group a lab
+# needs, so a 16 GB laptop never runs everything at once:
+#
+#   docker compose --profile lab1  up -d     Lab 1: Redis + MongoDB (+ PostgreSQL ledger)
+#   docker compose --profile lab2  up -d     Lab 2: three-node Cassandra cluster
+#   docker compose --profile lab3a up -d     Lab 3 Part A: the same three-node cluster
+#   docker compose --profile lab3b up -d     Lab 3 Part B: Redis (Streams)
+#   docker compose --profile lab4  up -d     Lab 4: Neo4j + PostgreSQL (pgvector)
+#   docker compose --profile capstone up -d  Lab 4 capstone: five stores, one payment
+#   docker compose --profile kafka up -d     OPTIONAL: Kafka instead of Redis Streams
+#
+# The "workbench" container (Python, with all the database drivers) has no
+# profile, so it always starts. Every lab command is run with
+#   docker compose exec <service> <tool>
+# so you do not need to install any database on your own computer.
+# =====================================================================
+name: pesa-labs
+
+x-cassandra-env: &cassandra-env
+  CASSANDRA_CLUSTER_NAME: PesaLab
+  CASSANDRA_DC: dc1
+  CASSANDRA_RACK: rack1
+  CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+  CASSANDRA_NUM_TOKENS: "16"
+  # A deliberately small JVM heap so that several nodes fit on a laptop.
+  # (cassandra-env.sh requires MAX_HEAP_SIZE and HEAP_NEWSIZE to be set together.)
+  MAX_HEAP_SIZE: 512M
+  HEAP_NEWSIZE: 128M
+  # Every node contacts cass1 to learn about the cluster. Seeds are ONLY the
+  # contact points for joining; a node that is its own seed skips bootstrap.
+  CASSANDRA_SEEDS: cass1
+
+x-cassandra: &cassandra
+  image: ${CASSANDRA_IMAGE}
+  # The wrapper only appends "auto_bootstrap: false" to cassandra.yaml when
+  # AUTO_BOOTSTRAP=false (used in Lab 3). Otherwise it changes nothing.
+  entrypoint: ["bash", "/scripts/cassandra-entrypoint.sh"]
+  command: ["cassandra", "-f"]
+  mem_limit: 1536m
+  restart: "no"
+  healthcheck:
+    test: ["CMD-SHELL", "bash /scripts/cassandra-healthcheck.sh"]
+    interval: 15s
+    timeout: 30s
+    retries: 30
+    start_period: 60s
+
+services:
+  # ------------------------------------------------------------------
+  # Python workbench: all database drivers + the lab scripts in /lab
+  # ------------------------------------------------------------------
+  workbench:
+    build:
+      context: .
+      dockerfile: Dockerfile.workbench
+      args:
+        PYTHON_IMAGE: ${PYTHON_IMAGE}
+    image: pesa-workbench:1
+    working_dir: /lab
+    command: ["sleep", "infinity"]
+    mem_limit: 1g
+    volumes:
+      - ./:/lab
+    environment:
+      PYTHONPATH: /lab/app
+      PYTHONUNBUFFERED: "1"
+      PG_DSN: postgresql://pesa:pesa_lab_password@postgres:5432/pesa
+      REDIS_HOST: redis
+      MONGO_URI: mongodb://mongo:27017/?replicaSet=rs0
+      CASS_HOSTS: cass1
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: pesa-lab-password
+      KAFKA_BOOTSTRAP: kafka:9092
+
+  # ------------------------------------------------------------------
+  # PostgreSQL 17 + pgvector: the LEDGER (system of record) and vectors
+  # ------------------------------------------------------------------
+  postgres:
+    image: ${POSTGRES_IMAGE}
+    profiles: ["lab1", "lab4", "capstone"]
+    environment:
+      POSTGRES_USER: pesa
+      POSTGRES_PASSWORD: pesa_lab_password
+      POSTGRES_DB: pesa
+    command: ["postgres", "-c", "shared_buffers=128MB", "-c", "max_connections=60"]
+    ports:
+      - "127.0.0.1:5440:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d:ro   # runs once, on an empty volume
+      - ./data:/lab-data:ro
+      - ./queries:/queries:ro                  # the SQL files used in Lab 4
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pesa -d pesa"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  # ------------------------------------------------------------------
+  # Redis (key-value / data-structure server / streams)
+  # ------------------------------------------------------------------
+  redis:
+    image: ${REDIS_IMAGE}
+    profiles: ["lab1", "lab3b", "capstone"]
+    # --save ""            : no periodic RDB snapshots
+    # --appendonly ${...}  : AOF persistence switch (Lab 1, Part D changes it)
+    # --appendfsync everysec: if AOF is on, fsync once per second
+    command: ["redis-server", "--save", "", "--appendonly", "${REDIS_APPENDONLY}", "--appendfsync", "everysec"]
+    ports:
+      - "127.0.0.1:6390:6379"
+    volumes:
+      - redis_data:/data
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  # ------------------------------------------------------------------
+  # MongoDB (document model). Runs as a ONE-member replica set because
+  # multi-document transactions are only available on replica sets.
+  # ------------------------------------------------------------------
+  mongo:
+    image: ${MONGO_IMAGE}
+    profiles: ["lab1", "capstone"]
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--wiredTigerCacheSizeGB", "0.25"]
+    ports:
+      - "127.0.0.1:27040:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ./scripts/mongo-healthcheck.sh:/scripts/mongo-healthcheck.sh:ro
+    mem_limit: 768m
+    healthcheck:
+      test: ["CMD-SHELL", "bash /scripts/mongo-healthcheck.sh"]
+      interval: 5s
+      timeout: 10s
+      retries: 30
+      start_period: 10s
+
+  # ------------------------------------------------------------------
+  # Cassandra: three nodes started one after another (Labs 2 and 3A)
+  # ------------------------------------------------------------------
+  cass1:
+    <<: *cassandra
+    profiles: ["lab2", "lab3a"]
+    hostname: cass1
+    environment:
+      <<: *cassandra-env
+    ports:
+      - "127.0.0.1:9142:9042"
+    volumes:
+      - ./scripts:/scripts:ro
+      - cass1_data:/var/lib/cassandra
+
+  cass2:
+    <<: *cassandra
+    profiles: ["lab2", "lab3a"]
+    hostname: cass2
+    environment:
+      <<: *cassandra-env
+    volumes:
+      - ./scripts:/scripts:ro
+      - cass2_data:/var/lib/cassandra
+    depends_on:
+      cass1:
+        condition: service_healthy
+
+  cass3:
+    <<: *cassandra
+    profiles: ["lab2", "lab3a"]
+    hostname: cass3
+    environment:
+      <<: *cassandra-env
+    volumes:
+      - ./scripts:/scripts:ro
+      - cass3_data:/var/lib/cassandra
+    depends_on:
+      cass2:
+        condition: service_healthy
+
+  # Lab 3A: nodes that you add LATER, by name, with docker compose up -d cass4
+  cass4:
+    <<: *cassandra
+    profiles: ["joiners"]
+    hostname: cass4
+    environment:
+      <<: *cassandra-env
+      AUTO_BOOTSTRAP: "${CASS4_AUTO_BOOTSTRAP:-false}"
+    volumes:
+      - ./scripts:/scripts:ro
+      - cass4_data:/var/lib/cassandra
+
+  cass5:
+    <<: *cassandra
+    profiles: ["joiners"]
+    hostname: cass5
+    environment:
+      <<: *cassandra-env
+      AUTO_BOOTSTRAP: "${CASS5_AUTO_BOOTSTRAP:-false}"
+    volumes:
+      - ./scripts:/scripts:ro
+      - cass5_data:/var/lib/cassandra
+
+  cass6:
+    <<: *cassandra
+    profiles: ["joiners"]
+    hostname: cass6
+    environment:
+      <<: *cassandra-env
+      AUTO_BOOTSTRAP: "true"
+    volumes:
+      - ./scripts:/scripts:ro
+      - cass6_data:/var/lib/cassandra
+
+  # A single, separate Cassandra node for the Lab 4 capstone (replication factor 1)
+  cass-solo:
+    <<: *cassandra
+    profiles: ["capstone"]
+    hostname: cass-solo
+    environment:
+      <<: *cassandra-env
+      CASSANDRA_SEEDS: cass-solo
+    volumes:
+      - ./scripts:/scripts:ro
+      - cass_solo_data:/var/lib/cassandra
+
+  # ------------------------------------------------------------------
+  # Neo4j Community (graph model)
+  # ------------------------------------------------------------------
+  neo4j:
+    image: ${NEO4J_IMAGE}
+    profiles: ["lab4", "capstone"]
+    environment:
+      NEO4J_AUTH: neo4j/pesa-lab-password
+      # Neo4j setting names: dots become "_" and an underscore becomes "__".
+      NEO4J_server_memory_heap_initial__size: 256m
+      NEO4J_server_memory_heap_max__size: 512m
+      NEO4J_server_memory_pagecache_size: 256m
+    ports:
+      - "127.0.0.1:7474:7474"   # Neo4j Browser (web UI)
+      - "127.0.0.1:7687:7687"   # Bolt (driver protocol)
+    volumes:
+      - neo4j_data:/data
+      - ./cypher:/cypher:ro                    # the Cypher files used in Lab 4
+    mem_limit: 1280m
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p pesa-lab-password 'RETURN 1' >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 10s
+      retries: 40
+      start_period: 20s
+
+  # ------------------------------------------------------------------
+  # OPTIONAL: Kafka (single-node KRaft) as the alternative to Redis Streams
+  # ------------------------------------------------------------------
+  kafka:
+    image: ${KAFKA_IMAGE}
+    profiles: ["kafka"]
+    hostname: kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_HEAP_OPTS: -Xms512m -Xmx512m
+    mem_limit: 1g
+
+volumes:
+  pg_data:
+  redis_data:
+  mongo_data:
+  cass1_data:
+  cass2_data:
+  cass3_data:
+  cass4_data:
+  cass5_data:
+  cass6_data:
+  cass_solo_data:
+  neo4j_data:

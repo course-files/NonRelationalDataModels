@@ -1,0 +1,61 @@
+dispute_id,txn_id,customer_id,opened_at,category,description
+DSP001,T002624,C0099,2026-07-23T18:23:53Z,refund_delay,The refund promised by the shop is overdue.
+DSP002,T010189,C0250,2026-09-20T20:00:35Z,refund_delay,The refund promised by the shop is overdue.
+DSP003,T011307,C0090,2026-09-26T23:44:03Z,wrong_amount,I was debited KES 150 but the receipt shows a smaller figure.
+DSP004,T008246,C0007,2026-09-06T01:34:28Z,double_charge,The payment to Twiga Airtime Kiosk was repeated and I was billed again.
+DSP005,T003162,C0147,2026-07-29T21:27:48Z,refund_delay,The refund promised by the shop is overdue.
+DSP006,T008464,C0313,2026-09-06T23:54:02Z,not_received,The order was paid for yet nothing was delivered.
+DSP007,T002647,C0140,2026-07-24T18:47:43Z,failed_but_debited,"Error message at checkout, funds were deducted anyway."
+DSP008,T007798,C0192,2026-09-01T06:20:12Z,unauthorised,Payment to Safari Fuel Stop that I do not recognise; my device may have been stolen.
+DSP009,T001728,C0183,2026-07-18T10:52:49Z,unauthorised,A transaction I never authorised appeared on my account.
+DSP010,T000678,C0258,2026-07-07T13:01:18Z,double_charge,The same payment of KES 990 appears two times on my statement.
+DSP011,T000050,C0290,2026-07-04T03:52:54Z,not_received,Goods not delivered even though the money left my account.
+DSP012,T010230,C0198,2026-09-19T23:18:45Z,refund_delay,The refund promised by the shop is overdue.
+DSP013,T000240,C0299,2026-07-07T18:17:36Z,unauthorised,"I did not make this payment, someone used my phone."
+DSP014,T007940,C0311,2026-09-04T20:55:01Z,double_charge,My account was debited two times for a single order at Bomet Dairy Hub.
+DSP015,T003799,C0174,2026-08-01T05:50:34Z,failed_but_debited,"The app said transaction unsuccessful, yet the money was deducted."
+DSP016,T011903,C0218,2026-10-02T17:03:37Z,not_received,Payment went through but the delivery never came.
+DSP017,T002916,C0065,2026-07-24T22:45:42Z,double_charge,The payment to Savanna Fresh Mart was repeated and I was billed again.
+DSP018,T000459,C0178,2026-07-09T22:17:43Z,double_charge,The payment to Savanna Fresh Mart was repeated and I was billed again.
+DSP019,T011025,C0007,2026-09-25T21:12:46Z,unauthorised,A transaction I never authorised appeared on my account.
+DSP020,T001491,C0232,2026-07-17T17:40:28Z,double_charge,I was charged twice for the same purchase at Twiga Airtime Kiosk.
+DSP021,T002369,C0160,2026-07-23T04:26:08Z,unauthorised,"Someone else spent my money, I did not approve KES 420."
+DSP022,T008428,C0023,2026-09-09T06:44:36Z,refund_delay,I was told I would get my money back but nothing has been credited.
+DSP023,T005892,C0239,2026-08-19T07:53:53Z,wrong_amount,"Wrong amount deducted, the shop quoted a lower price."
+DSP024,T000295,C0244,2026-07-08T10:33:28Z,failed_but_debited,"The app said transaction unsuccessful, yet the money was deducted."
+DSP025,T006915,C0007,2026-08-28T14:26:01Z,unauthorised,"Unrecognised charge, I suspect my SIM was swapped."
+DSP026,T011348,C0201,2026-10-01T21:42:39Z,unauthorised,"Someone else spent my money, I did not approve KES 180."
+DSP027,T004562,C0120,2026-08-08T08:21:33Z,failed_but_debited,Declined at Simba Electronics but the amount was still taken from my wallet.
+DSP028,T003185,C0080,2026-07-26T20:20:46Z,wrong_amount,The merchant took more money than I authorised.
+DSP029,T000516,C0115,2026-07-07T01:44:39Z,wrong_amount,I was debited KES 420 but the receipt shows a smaller figure.
+DSP030,T011454,C0207,2026-09-30T19:54:25Z,wrong_amount,"Wrong amount deducted, the shop quoted a lower price."
+DSP031,T001153,C0007,2026-07-13T00:55:23Z,refund_delay,Cancelled order at Jua Kali Hardware and the refund is late.
+DSP032,T008690,C0154,2026-09-09T00:00:08Z,not_received,I have not received my purchase from Safari Fuel Stop after paying KES 390.
+DSP033,T009760,C0247,2026-09-15T12:55:43Z,refund_delay,Reversal of KES 290 has not been credited to my wallet yet.
+DSP034,T000996,C0283,2026-07-12T13:26:36Z,wrong_amount,I was debited KES 610 but the receipt shows a smaller figure.
+DSP035,T007365,C0076,2026-08-27T17:41:18Z,double_charge,Duplicate debit after I tapped pay only once.
+DSP036,T005423,C0007,2026-08-13T23:12:20Z,failed_but_debited,Declined at Savanna Fresh Mart but the amount was still taken from my wallet.
+DSP037,T002622,C0007,2026-07-25T18:21:43Z,refund_delay,The refund promised by the shop is overdue.
+DSP038,T004584,C0055,2026-08-10T21:02:27Z,unauthorised,"I did not make this payment, someone used my phone."
+DSP039,T000422,C0007,2026-07-05T20:29:32Z,not_received,Goods not delivered even though the money left my account.
+DSP040,T003648,C0204,2026-07-31T19:32:39Z,refund_delay,I returned the item two weeks ago and the refund has not arrived.
+DSP041,T011757,C0076,2026-10-04T17:15:01Z,double_charge,Duplicate debit after I tapped pay only once.
+DSP042,T005609,C0002,2026-08-15T22:56:44Z,not_received,Goods not delivered even though the money left my account.
+DSP043,T003348,C0026,2026-07-29T15:22:19Z,not_received,Paid for airtime at Savanna Fresh Mart and it did not arrive.
+DSP044,T003019,C0007,2026-07-29T23:21:28Z,double_charge,The payment to Mto Wa Mawe Pharmacy was repeated and I was billed again.
+DSP045,T005431,C0007,2026-08-15T15:13:40Z,failed_but_debited,The payment showed failed but my balance went down.
+DSP046,T001904,C0007,2026-07-21T08:28:43Z,wrong_amount,The amount taken is higher than the price displayed at the till.
+DSP047,T000728,C0007,2026-07-09T21:16:25Z,failed_but_debited,"Transfer failed on screen but KES 1,480 left my account."
+DSP048,T001326,C0007,2026-07-15T00:44:46Z,failed_but_debited,"The app said transaction unsuccessful, yet the money was deducted."
+DSP049,T004817,C0117,2026-08-12T23:42:55Z,double_charge,I was charged twice for the same purchase at Chai Bora Tea Room.
+DSP050,T007504,C0117,2026-09-01T09:00:44Z,wrong_amount,The amount taken is higher than the price displayed at the till.
+DSP051,T003207,C0022,2026-07-30T05:41:17Z,not_received,"I have not received my purchase from Mto Wa Mawe Pharmacy after paying KES 1,020."
+DSP052,T000383,C0007,2026-07-06T14:22:53Z,unauthorised,Fraudulent debit on my wallet that I did not initiate.
+DSP053,T004351,C0022,2026-08-09T09:13:13Z,refund_delay,I was told I would get my money back but nothing has been credited.
+DSP054,T008673,C0007,2026-09-09T00:02:34Z,failed_but_debited,"The app said transaction unsuccessful, yet the money was deducted."
+DSP055,T000414,C0007,2026-07-06T16:14:28Z,wrong_amount,"Wrong amount deducted, the shop quoted a lower price."
+DSP056,T011981,C0232,2026-10-01T19:33:43Z,wrong_amount,The merchant took more money than I authorised.
+DSP057,T007526,C0067,2026-09-02T03:48:27Z,not_received,Payment went through but the delivery never came.
+DSP058,T009630,C0223,2026-09-16T10:43:53Z,failed_but_debited,"It said the payment did not go through, however I was debited."
+DSP059,T001452,C0148,2026-07-14T01:26:13Z,not_received,The order was paid for yet nothing was delivered.
+DSP060,T006354,C0096,2026-08-21T08:58:36Z,unauthorised,Fraudulent debit on my wallet that I did not initiate.

@@ -1,0 +1,7 @@
+# The "workbench": a small Python image holding every driver used in the labs.
+ARG PYTHON_IMAGE=python:3.12-slim
+FROM ${PYTHON_IMAGE}
+WORKDIR /lab
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+CMD ["sleep", "infinity"]

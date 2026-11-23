@@ -1,0 +1,21 @@
+{
+  "seed": 20261010,
+  "counts": {
+    "customers": 320,
+    "accounts": 400,
+    "merchants": 40,
+    "devices": 402,
+    "account_devices": 434,
+    "transactions": 12000,
+    "disputes": 60
+  },
+  "sha256": {
+    "account_devices.csv": "bf77201aedba214cd7358da5943ffd43ed1476b18cb66732be5ef03286e6f4b7",
+    "accounts.csv": "2e1b56581588c608a82c4c0351f0db893ef068c3adfdd3a6c8fbb25e3fb43f9c",
+    "customers.csv": "f663b3a33d670a2a1e1df288fd0403f84dec9a0b0066c872c08a7378302394cc",
+    "devices.csv": "4a1612bf34821b0f91f6d77a3442dcfd010f7afbbee5e2ab91ed2fa290e6622b",
+    "disputes.csv": "cc4e8542e397965b98a093754c9a8116ff7846e1b9975f778a9abba1721370f6",
+    "merchants.csv": "6dcd520b438f09ca174957cf30277a0052469d194acb4211cdbb23ea89606a01",
+    "transactions.csv": "4b7abeca45ee29bc659df2db5a41795181f77b043fe7b04eeb3da88c73f42f5f"
+  }
+}
